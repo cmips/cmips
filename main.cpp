@@ -52,9 +52,7 @@ int i_loop3_max = 10;
 void *t_calculations(void *param)
 {
     
-    //int *thread_i = (int *) param;
-    //int thread_id = *thread_i;
-    int *thread_id = (int *) param;
+    int *i_thread_id = (int *) param;
 
     // current date/time based on current system
     time_t now = time(0);
@@ -64,7 +62,7 @@ void *t_calculations(void *param)
     // convert now to string form
     char* dt_now = ctime(&now);
     
-    printf("Starting thread %i at ", *thread_id);
+    printf("Starting thread %i at ", *i_thread_id);
     cout << dt_now << "\n";
     for (i_loop1 = 0; i_loop1<i_loop_max; i_loop1++)
     {
@@ -94,7 +92,7 @@ void *t_calculations(void *param)
     // convert now to string form
     char* dt_now_end = ctime(&now_end);
     
-    printf("End thread at "); // %s at ", thread_id);
+    printf("End thread %i at ", *i_thread_id);
     cout << dt_now_end << "\n";
     
     i_finished_threads++;
