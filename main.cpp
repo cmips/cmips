@@ -237,9 +237,13 @@ int main()
 
     double secs = (t1 - t0) / 1000000.0L;
     
-    int cmips = (1 / secs) * 1000000;
+    // * 2 to maintain compatibility with metrics from older CMIPS, as we doubled the number of threads
+    int cmips = ((1 / secs) * 1000000) * 2;
 
     time_t now_end = time(0);
+    
+    // Write again the Starting time
+    printf("Starting time: %s", dt_now);
     
     // convert now to string form
     char* dt_now_end = ctime(&now_end);
@@ -248,7 +252,7 @@ int main()
     write_log("End time: ");
     write_log(dt_now_end);
     
-    printf("Execution time: %d\n", secs);
+    printf("Execution time: %f\n", secs);
     write_log("Execution time:");
     //printf(secs);
     //cout << secs << "\n";
