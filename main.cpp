@@ -2,8 +2,8 @@
  * File:   main.cpp
  * Author: carles
  *
- * Created on 17 / agost / 2013, 22:04
- * Last Modified on 22 / Agost / 2013 09:50
+ * Created on 17 / August / 2013, 22:04
+ * Last Modified on 27 / August / 2014 17:50
  */
 
 // Note: link with -lpthread
@@ -36,17 +36,17 @@ using namespace std;
 
 typedef unsigned long long timestamp_t;
 
-char s_cmips[50] = "CMIPS V.1.0.4 by Carles Mateo www.carlesmateo.com";
+char s_cmips[50] = "CMIPS V.1.0.5 by Carles Mateo www.carlesmateo.com";
 char s_tmp_copy[1];
 
-int i_max_threads = 100;
+// Config for multiple threads, modern Servers.
+int i_max_threads = 200;
+
 int i_finished_threads = 0;
 
-int i_loop1 = 0;
+// Config parameters. Same with previous CMIPS versions
 int i_loop_max = 32000;
-int i_loop2 = 0;
 int i_loop2_max = 32000;
-int i_loop3 = 0;
 int i_loop3_max = 10;
 
 void *t_calculations(void *param)
@@ -54,6 +54,10 @@ void *t_calculations(void *param)
     
     int *i_thread_id = (int *) param;
 
+    int i_loop1 = 0;
+    int i_loop2 = 0;
+    int i_loop3 = 0;
+    
     // current date/time based on current system
     time_t now = time(0);
     int i_l_counter = 0;
@@ -62,20 +66,20 @@ void *t_calculations(void *param)
     // convert now to string form
     char* dt_now = ctime(&now);
     
-    printf("Starting thread %i at ", *i_thread_id);
-    cout << dt_now << "\n";
-    for (i_loop1 = 0; i_loop1<i_loop_max; i_loop1++)
+    printf("Starting thread %i at %s\n", *i_thread_id, dt_now);
+    
+    for (i_loop1 = 0; i_loop1 < i_loop_max; i_loop1++)
     {
-        for (i_loop2 = 0; i_loop2<i_loop2_max; i_loop2++) 
+        for (i_loop2 = 0; i_loop2 < i_loop2_max; i_loop2++) 
         {
-            for (i_loop3 = 0; i_loop3<i_loop3_max; i_loop3++) {
+            for (i_loop3 = 0; i_loop3 < i_loop3_max; i_loop3++) {
                 // Increment test
                 i_l_counter++;
-                // If test and assignement
-                if (i_l_counter>32000) {
+                // Test "if" and assignment
+                if (i_l_counter > 32000) {
                     i_l_counter = 0;
                 }
-                // Char test
+                // Test char, accessing memory
                 s_tmp_copy[0] = s_cmips[i_l_counter_char];
                 
                 i_l_counter_char++;
@@ -92,8 +96,8 @@ void *t_calculations(void *param)
     // convert now to string form
     char* dt_now_end = ctime(&now_end);
     
-    printf("End thread %i at ", *i_thread_id);
-    cout << dt_now_end << "\n";
+    printf("End thread %i at %s\n", *i_thread_id, dt_now_end);
+    //cout << dt_now_end << "\n";
     
     i_finished_threads++;
     
@@ -138,8 +142,48 @@ void write_log(double d_value_to_log) {
     
 }
 
+bool fileExists (const std::string& s_name) {
+    ifstream f(s_name.c_str());
+    if (f.good()) {
+        f.close();
+        return true;
+    } else {
+        f.close();
+        return false;
+    }  
+}
+
+char *readFile(char *s_filename) {
+    
+    char* s_output = new char[2000000];
+    
+    if (fileExists == false) {
+        return s_output;
+    }
+    
+    ifstream o_ReadFile;
+    o_ReadFile.open(s_filename);    
+    
+    if (o_ReadFile.is_open()) {
+        while (!o_ReadFile.eof()) {
+           //o_ReadFile >> s_output;
+           o_ReadFile.read(s_output, 2000000);
+        }
+    }
+    o_ReadFile.close();
+   
+    return s_output;    
+    
+}
+
 int main()
 {
+    // Get info from the System
+    char* s_system_maxthreads = new char[2000000];
+    char* s_system_cpuinfo    = new char[2000000];
+
+    s_system_maxthreads = readFile("/proc/sys/kernel/threads-max");
+    s_system_cpuinfo = readFile("/proc/cpuinfo");
     
     timestamp_t t0 = get_timestamp();    
     
@@ -154,13 +198,17 @@ int main()
 
     int i_counter = 0;    
     
-    printf("CMIPS V1.0.4 by Carles Mateo - www.carlesmateo.com\n");
-    write_log("CMIPS V1.0.4 by Carles Mateo - www.carlesmateo.com");
+    printf("CMIPS V1.0.5 by Carles Mateo - www.carlesmateo.com\n");
+    write_log("CMIPS V1.0.5 by Carles Mateo - www.carlesmateo.com");
+    printf("Max threads in the system: %s (from /proc/sys/kernel/threads-max)\n", s_system_maxthreads);
+    write_log(s_system_maxthreads);
+    printf("/proc/cpuinfo\n");
+    cout << s_system_cpuinfo;
+    write_log(s_system_cpuinfo);
     printf("\n");
-    printf("Starting time: ");
+    printf("Starting time: %s", dt_now);
     write_log("Starting time: ");
     
-    cout << dt_now;
     write_log(dt_now);
     printf("\n");
     printf("Starting calculations\n");
@@ -195,15 +243,15 @@ int main()
     
     // convert now to string form
     char* dt_now_end = ctime(&now_end);
-    printf("End time: ");
-    cout << dt_now_end << "\n";
+    printf("End time: %s\n", dt_now_end);
+    //cout << dt_now_end << "\n";
     write_log("End time: ");
     write_log(dt_now_end);
     
-    printf("Execution time:");
+    printf("Execution time: %d\n", secs);
     write_log("Execution time:");
     //printf(secs);
-    cout << secs << "\n";
+    //cout << secs << "\n";
     write_log(secs);
     
     printf("CMIPS: ");
