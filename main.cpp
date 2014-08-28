@@ -37,7 +37,6 @@ using namespace std;
 typedef unsigned long long timestamp_t;
 
 char s_cmips[50] = "CMIPS V.1.0.5 by Carles Mateo www.carlesmateo.com";
-char s_tmp_copy[1];
 
 // Config for multiple threads, modern Servers.
 int i_max_threads = 200;
@@ -54,49 +53,51 @@ void *t_calculations(void *param)
     
     int *i_thread_id = (int *) param;
 
-    int i_loop1 = 0;
-    int i_loop2 = 0;
-    int i_loop3 = 0;
+    char l_s_tmp_copy[1];
+    int l_i_loop1 = 0;
+    int l_i_loop2 = 0;
+    int l_i_loop3 = 0;
     
     // current date/time based on current system
-    time_t now = time(0);
-    int i_l_counter = 0;
-    int i_l_counter_char = 0;
+    time_t l_now = time(0);
+    int l_i_counter = 0;
+    int l_i_counter_char = 0;
    
     // convert now to string form
-    char* dt_now = ctime(&now);
+    char* l_dt_now = ctime(&l_now);
     
-    printf("Starting thread %i at %s\n", *i_thread_id, dt_now);
+    printf("Starting thread %i at %s", *i_thread_id, l_dt_now);
     
-    for (i_loop1 = 0; i_loop1 < i_loop_max; i_loop1++)
+    for (l_i_loop1 = 0; l_i_loop1 < i_loop_max; l_i_loop1++)
     {
-        for (i_loop2 = 0; i_loop2 < i_loop2_max; i_loop2++) 
+        for (l_i_loop2 = 0; l_i_loop2 < i_loop2_max; l_i_loop2++) 
         {
-            for (i_loop3 = 0; i_loop3 < i_loop3_max; i_loop3++) {
+            for (l_i_loop3 = 0; l_i_loop3 < i_loop3_max; l_i_loop3++) {
                 // Increment test
-                i_l_counter++;
+                l_i_counter++;
                 // Test "if" and assignment
-                if (i_l_counter > 32000) {
-                    i_l_counter = 0;
+                if (l_i_counter > 32000) {
+                    l_i_counter = 0;
                 }
                 // Test char, accessing memory
-                s_tmp_copy[0] = s_cmips[i_l_counter_char];
+                l_s_tmp_copy[0] = s_cmips[l_i_counter_char];
                 
-                i_l_counter_char++;
-                if (i_l_counter_char > 49) {
-                    i_l_counter_char = 0;
+                l_i_counter_char++;
+                if (l_i_counter_char > 49) {
+                    l_i_counter_char = 0;
                 }
                 
             }
         }   
     }
     
-    time_t now_end = time(0);
+    time_t l_now_end = time(0);
     
     // convert now to string form
-    char* dt_now_end = ctime(&now_end);
+    char* l_dt_now_end = ctime(&l_now_end);
     
-    printf("End thread %i at %s\n", *i_thread_id, dt_now_end);
+    // Note: s_tmp_copy[0] is printed to prevent optimization of some C++ compilers (if the variable is not used)
+    printf("End thread %i (%i) at %s", *i_thread_id, l_s_tmp_copy[0], l_dt_now_end);
     //cout << dt_now_end << "\n";
     
     i_finished_threads++;
@@ -189,17 +190,18 @@ int main()
     
     // current date/time based on current system
     time_t now = time(0);
-    
-    // File
-    ofstream myfile;
-   
+      
     // convert now to string form
     char* dt_now = ctime(&now);
 
+    // File
+    ofstream o_file;
+    
     int i_counter = 0;    
     
     printf("CMIPS V1.0.5 by Carles Mateo - www.carlesmateo.com\n");
     write_log("CMIPS V1.0.5 by Carles Mateo - www.carlesmateo.com");
+    
     printf("Max threads in the system: %s (from /proc/sys/kernel/threads-max)\n", s_system_maxthreads);
     write_log(s_system_maxthreads);
     printf("/proc/cpuinfo\n");
@@ -207,11 +209,11 @@ int main()
     write_log(s_system_cpuinfo);
     printf("\n");
     printf("Starting time: %s", dt_now);
-    write_log("Starting time: ");
-    
+    write_log("Starting time: ");    
     write_log(dt_now);
+    
     printf("\n");
-    printf("Starting calculations\n");
+    printf("Starting calculations with %i Threads\n", i_max_threads);
     
     // http://stackoverflow.com/questions/344203/maximum-number-of-threads-per-process-in-linux
     // Linux doesn't have a separate threads per process limit, just a limit on the total number of processes on the system
@@ -241,10 +243,7 @@ int main()
     int cmips = ((1 / secs) * 1000000) * 2;
 
     time_t now_end = time(0);
-    
-    // Write again the Starting time
-    printf("Starting time: %s", dt_now);
-    
+       
     // convert now to string form
     char* dt_now_end = ctime(&now_end);
     printf("End time: %s\n", dt_now_end);
@@ -254,16 +253,14 @@ int main()
     
     printf("Execution time: %f\n", secs);
     write_log("Execution time:");
-    //printf(secs);
-    //cout << secs << "\n";
     write_log(secs);
     
-    printf("CMIPS: ");
+    printf("CMIPS: %i\n", cmips);
     write_log("CMIPS: ");
-    cout << cmips << "\n";
+    //cout << cmips << "\n";
     write_log(cmips);
             
-    myfile.close();
+    o_file.close();
     
     return 0;
     
